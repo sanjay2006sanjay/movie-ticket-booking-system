@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-contrast="normal" data-font-size="medium">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CineSphere – Cinematic Movie Ticket Booking</title>
+  <meta name="description" content="Experience premium cinematic booking with CineSphere. Easily search movies, select luxury seats, order snack combos, and complete payments securely.">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0a0a0f">
+  
+  <!-- Favicon / Apple Touch Icon -->
+  <link rel="icon" type="image/svg+xml" href="assets/icon.svg">
+  <link rel="apple-touch-icon" href="assets/icon.svg">
+</head>
+<body>
+
+  <!-- Screen Reader Announcements (Dynamic Live Region) -->
+  <div id="sr-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Skip to Main Content Link for Keyboard Accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- Global Cinematic Background -->
+  <div class="cinematic-bg-wrapper" aria-hidden="true">
+    <img id="global-bg" class="cinematic-bg" src="" alt="">
+    <div class="cinematic-bg-overlay"></div>
+  </div>
+
+  <!-- Header / Navigation Bar -->
+  <header class="navbar" role="banner">
+    <a href="#" class="navbar-brand" id="brand-link" aria-label="CineSphere Home">
+      <span class="brand-logo">CineSphere</span>
+    </a>
+
+    <!-- Accessibility settings & filters -->
+    <div class="navbar-controls">
+      
+      <!-- Smart Search -->
+      <div class="search-container">
+        <label for="movie-search" class="sr-only">Search movies</label>
+        <input type="search" id="movie-search" class="search-input" placeholder="Search movies..." autocomplete="off">
+        <button id="btn-voice-search" class="search-btn-voice" aria-label="Search by voice">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-mic"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+        </button>
+        <!-- Search Auto-complete container -->
+        <div id="search-dropdown" class="search-results glass-panel" role="listbox" aria-label="Search suggestions"></div>
+      </div>
+
+      <!-- Location Selector -->
+      <button id="btn-location-select" class="nav-item" aria-haspopup="dialog" aria-expanded="false" aria-label="Select location, current: Detect Geolocation">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+        <span id="current-location">Geolocation</span>
+      </button>
+
+      <!-- Region Selector (Polite live announcements on change) -->
+      <label for="region-select" class="sr-only">Choose Region</label>
+      <select id="region-select" class="filter-select" aria-label="Select region" style="margin-right: 5px;">
+        <option value="Asia">Asia (₹ INR)</option>
+        <option value="North America">North America ($ USD)</option>
+        <option value="Middle East">Middle East (SAR)</option>
+        <option value="South Africa">South Africa (ZAR)</option>
+        <option value="Europe">Europe (€ EUR)</option>
+      </select>
+
+      <!-- Language Selector -->
+      <label for="language-select" class="sr-only">Choose Language</label>
+      <select id="language-select" class="filter-select" aria-label="Select language">
+        <option value="en">English</option>
+        <option value="hi">हिन्दी</option>
+        <option value="ar">العربية (RTL)</option>
+        <option value="es">Español</option>
+        <option value="fr">Français</option>
+      </select>
+
+      <!-- Preferences Dropdown (Theme, Font, Contrast) -->
+      <div class="nav-badge-container">
+        <button id="btn-settings-dropdown" class="nav-item" aria-haspopup="true" aria-expanded="false" aria-label="A11y Preferences Menu">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </button>
+        <!-- settings dropdown -->
+        <div id="settings-menu" class="dropdown-menu glass-panel" role="menu">
+          <div class="dropdown-title">Theme Preference</div>
+          <button class="dropdown-item" role="menuitem" id="opt-theme-dark">
+            <span>🌙 Dark Cinematic Theme</span>
+          </button>
+          <button class="dropdown-item" role="menuitem" id="opt-theme-light">
+            <span>☀️ Light Modern Theme</span>
+          </button>
+          
+          <div class="dropdown-title">Contrast</div>
+          <button class="dropdown-item" role="menuitem" id="opt-contrast-toggle">
+            <span>👁️ Toggle High Contrast Mode</span>
+          </button>
+
+          <div class="dropdown-title">Text Accessibility</div>
+          <button class="dropdown-item" role="menuitem" id="opt-text-medium"><span>Standard Text (100%)</span></button>
+          <button class="dropdown-item" role="menuitem" id="opt-text-large"><span>Large Text (125%)</span></button>
+          <button class="dropdown-item" role="menuitem" id="opt-text-xlarge"><span>Extra Large Text (150%)</span></button>
+        </div>
+      </div>
+
+      <!-- Notifications -->
+      <div class="nav-badge-container">
+        <button id="btn-notifications" class="nav-item" aria-haspopup="true" aria-expanded="false" aria-label="Notifications, 3 unread notifications">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+          <span class="nav-badge" id="notif-count">3</span>
+        </button>
+        <div id="notif-dropdown" class="dropdown-menu glass-panel" role="menu" aria-label="Notifications">
+          <div class="dropdown-title">Recent Updates</div>
+          <div class="dropdown-item" style="cursor: default;">⚡ 15% Combo Deal added on popcorn packs!</div>
+          <div class="dropdown-item" style="cursor: default;">🎥 Watch Dune Part Three Trailer in IMAX now.</div>
+          <div class="dropdown-item" style="cursor: default;">🎫 Booking Reminder: Show tomorrow at 7 PM.</div>
+        </div>
+      </div>
+
+      <!-- Watchlist -->
+      <div class="nav-badge-container">
+        <button id="btn-watchlist" class="nav-item" aria-label="Watchlist, 0 saved items">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+          <span class="nav-badge" id="watchlist-count">0</span>
+        </button>
+        <div id="watchlist-dropdown" class="dropdown-menu glass-panel" role="menu" aria-label="Watchlist movies">
+          <div class="dropdown-title">My Saved Movies</div>
+          <div id="watchlist-items-list">
+            <div class="dropdown-item" style="color: var(--text-muted);">No movies saved yet. Click the heart icon on any card!</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile Selector -->
+      <div class="nav-badge-container">
+        <button id="btn-profile" class="nav-item" aria-haspopup="true" aria-expanded="false" aria-label="User Account Profile">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          <span id="user-display-name">Guest</span>
+        </button>
+        <div id="profile-dropdown" class="dropdown-menu glass-panel" role="menu" style="width: 280px;">
+          <div class="dropdown-title" id="profile-greet">Welcome Guest</div>
+          <div class="dropdown-item" id="btn-view-loyalty">🏅 Loyalty Points: <span id="loyalty-pt-text">120</span></div>
+          <div class="dropdown-title">Booking History</div>
+          <div id="booking-history-list" style="max-height: 150px; overflow-y: auto; padding: 0 5px; margin-bottom: 5px;">
+            <div class="dropdown-item" style="color: var(--text-muted); font-size: 0.8rem; pointer-events: none;">No bookings found.</div>
+          </div>
+          <button class="dropdown-item" role="menuitem" id="btn-logout">Logout</button>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Offline status indicator banner -->
+  <div id="offline-banner" class="offline-banner" role="alert" aria-live="assertive">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="23" y2="23"></line><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.5"></path><path d="M5 12.5a10.94 10.94 0 0 1 5.17-2.39"></path><path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><path d="M12 20a2.5 2.5 0 0 1 0-5"></path></svg>
+    <span>Offline Mode. You are currently viewing cached data. Booking tickets requires an internet connection.</span>
+  </div>
+
+  <!-- Primary Page Views -->
+  <main id="main-content" tabindex="-1">
+
+    <!-- PAGE 1: Login / Sign-up View -->
+    <section id="view-login" class="view-section active" aria-labelledby="auth-heading">
+      <h2 id="auth-heading" class="sr-only">Authentication Page</h2>
+      <div class="auth-container">
+        <div class="auth-card glass-panel">
+          <div class="auth-logo">
+            <h1 class="auth-logo-title">CineSphere</h1>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">Elevate Your Movie Experience</p>
+          </div>
+
+          <!-- ARIA tabs container -->
+          <div class="auth-tabs" role="tablist" aria-label="Account Action">
+            <button id="tab-login" class="auth-tab-btn active" role="tab" aria-selected="true" aria-controls="form-login" tabindex="0">Login</button>
+            <button id="tab-signup" class="auth-tab-btn" role="tab" aria-selected="false" aria-controls="form-signup" tabindex="-1">Sign Up</button>
+          </div>
+
+          <!-- Login Form -->
+          <form id="form-login" class="auth-form active" aria-label="Login Form" novalidate>
+            <div class="form-group">
+              <label for="login-email" class="form-label">Email or Phone Number</label>
+              <input type="text" id="login-email" class="form-input" required aria-required="true">
+              <span id="err-login-email" class="form-error" role="alert"></span>
+            </div>
+
+            <div class="form-group">
+              <label for="login-password" class="form-label">Password</label>
+              <div class="input-wrapper">
+                <input type="password" id="login-password" class="form-input" required aria-required="true">
+                <button type="button" id="btn-toggle-login-pwd" class="input-toggle-pwd" aria-label="Show password">Show</button>
+              </div>
+              <span id="err-login-pwd" class="form-error" role="alert"></span>
+            </div>
+
+            <div class="form-row">
+              <label class="checkbox-label">
+                <input type="checkbox" id="login-remember"> Remember Me
+              </label>
+              <a href="#" class="form-link">Forgot Password?</a>
+            </div>
+
+            <button type="submit" id="btn-login-submit" class="btn-primary">
+              <span class="spinner" id="login-spinner"></span>
+              <span id="login-btn-text">Log In</span>
+            </button>
+          </form>
+
+          <!-- Sign-up Form -->
+          <form id="form-signup" class="auth-form" aria-label="Sign Up Form" novalidate>
+            <div class="form-group">
+              <label for="signup-name" class="form-label">Full Name</label>
+              <input type="text" id="signup-name" class="form-input" required aria-required="true">
+              <span id="err-signup-name" class="form-error" role="alert"></span>
+            </div>
+
+            <div class="form-group">
+              <label for="signup-email" class="form-label">Email Address</label>
+              <input type="email" id="signup-email" class="form-input" required aria-required="true">
+              <span id="err-signup-email" class="form-error" role="alert"></span>
+            </div>
+
+            <div class="form-group">
+              <label for="signup-phone" class="form-label">Mobile Number</label>
+              <div class="input-wrapper" style="gap: 8px;">
+                <label for="signup-country-code" class="sr-only">Country Code</label>
+                <select id="signup-country-code" class="filter-select" style="border-radius: var(--border-radius-button); height: 42px;">
+                  <option value="+91">🇮🇳 +91</option>
+                  <option value="+1">🇺🇸 +1</option>
+                  <option value="+966">🇸🇦 +966</option>
+                  <option value="+27">🇿🇦 +27</option>
+                  <option value="+33">🇫🇷 +33</option>
+                </select>
+                <input type="tel" id="signup-phone" class="form-input" placeholder="Enter mobile" required aria-required="true" style="flex-grow: 1;">
+              </div>
+              <span id="err-signup-phone" class="form-error" role="alert"></span>
+            </div>
+
+            <div class="form-group">
+              <label for="signup-password" class="form-label">Password</label>
+              <div class="input-wrapper">
+                <input type="password" id="signup-password" class="form-input" placeholder="Min 8 characters" required aria-required="true">
+                <button type="button" id="btn-toggle-signup-pwd" class="input-toggle-pwd" aria-label="Show password">Show</button>
+              </div>
+              <span id="err-signup-pwd" class="form-error" role="alert"></span>
+            </div>
+
+            <div class="form-group">
+              <label for="signup-confirm" class="form-label">Confirm Password</label>
+              <input type="password" id="signup-confirm" class="form-input" required aria-required="true">
+              <span id="err-signup-confirm" class="form-error" role="alert"></span>
+            </div>
+
+            <div class="form-row">
+              <label class="checkbox-label">
+                <input type="checkbox" id="signup-terms" required aria-required="true"> I accept the <a href="#" class="form-link">Terms & Conditions</a>
+              </label>
+            </div>
+            <span id="err-signup-terms" class="form-error" role="alert" style="margin-top: -10px;"></span>
+
+            <button type="submit" id="btn-signup-submit" class="btn-primary">
+              <span class="spinner" id="signup-spinner"></span>
+              <span id="signup-btn-text">Create Account</span>
+            </button>
+          </form>
+
+          <!-- Social Logins -->
+          <div class="social-login-wrapper">
+            <div class="social-divider">Or continue with</div>
+            <div class="social-btn-container">
+              <button class="btn-social" aria-label="Sign in using Google account">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12.24 10.285V13.4h6.887c-.275 1.565-1.88 4.604-6.887 4.604-4.33 0-7.866-3.577-7.866-8s3.536-8 7.866-8c2.46 0 4.105 1.025 5.047 1.926l2.427-2.334C17.955 2.192 15.34 1 12.24 1 5.48 1 0 6.48 0 13s5.48 12 12.24 12c7.06 0 11.758-4.959 11.758-11.966 0-.807-.087-1.422-.196-1.749H12.24z"/></svg>
+                Google
+              </button>
+              <button class="btn-social" aria-label="Sign in using Apple account">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-.96.04-2.13.64-2.82 1.45-.6.69-1.12 1.84-.98 2.94 1.07.08 2.16-.52 2.81-1.33z"/></svg>
+                Apple
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 2: Home Page View -->
+    <section id="view-home" class="view-section" aria-labelledby="home-heading">
+      <h2 id="home-heading" class="sr-only">Home Page</h2>
+
+      <!-- Hero Banner -->
+      <div class="hero-banner" id="hero-banner" role="region" aria-label="Featured Movie Banner">
+        <img id="hero-img" class="hero-img" src="" alt="Featured film main banner poster">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <h1 id="hero-title" class="hero-title"></h1>
+          <p id="hero-tagline" class="hero-tagline"></p>
+          <div class="hero-ctas">
+            <button id="btn-hero-book" class="btn-primary" style="width: auto; padding: 12px 28px;">Book Tickets</button>
+            <button id="btn-hero-play" class="hero-btn-play" aria-label="Play featured trailer scene">▶</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loyalty Progress Banner -->
+      <div class="loyalty-banner glass-panel" role="region" aria-label="Loyalty and rewards progress">
+        <div class="loyalty-info">
+          <span class="loyalty-title">CineSphere Gold Rewards</span>
+          <p style="font-size: 0.85rem; color: var(--text-secondary);">Earn points with every ticket. Get a free movie ticket at 200 points!</p>
+          <div class="loyalty-progress-container">
+            <div class="loyalty-progress-bar-bg">
+              <div id="loyalty-progress" class="loyalty-progress-bar-fill" role="progressbar" aria-valuenow="120" aria-valuemin="0" aria-valuemax="200" aria-label="Loyalty points balance progress bar"></div>
+            </div>
+            <span class="loyalty-points"><span id="loyalty-current-val">120</span> / 200 pts</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter Controls -->
+      <div class="filter-bar glass-panel" role="search" aria-label="Movie filters">
+        <fieldset class="filter-fieldset">
+          <legend class="filter-legend">Genre</legend>
+          <select id="filter-genre" class="filter-select" aria-label="Filter by genre">
+            <option value="all">All Genres</option>
+            <option value="sci-fi">Sci-Fi</option>
+            <option value="action">Action</option>
+            <option value="adventure">Adventure</option>
+            <option value="drama">Drama</option>
+            <option value="thriller">Thriller</option>
+            <option value="romance">Romance</option>
+            <option value="superhero">Superhero</option>
+            <option value="marvel">Marvel</option>
+            <option value="dc">DC</option>
+            <option value="animation">Animation</option>
+            <option value="fantasy">Fantasy</option>
+            <option value="hollywood">Hollywood Hits</option>
+          </select>
+        </fieldset>
+
+        <fieldset class="filter-fieldset">
+          <legend class="filter-legend">Language</legend>
+          <select id="filter-lang" class="filter-select" aria-label="Filter by language">
+            <option value="all">All Languages</option>
+            <option value="English">English</option>
+            <option value="Spanish">Spanish</option>
+            <option value="Arabic">Arabic</option>
+            <option value="Hindi">Hindi</option>
+            <option value="French">French</option>
+          </select>
+        </fieldset>
+
+        <fieldset class="filter-fieldset">
+          <legend class="filter-legend">Format</legend>
+          <select id="filter-format" class="filter-select" aria-label="Filter by screening format">
+            <option value="all">All Formats</option>
+            <option value="IMAX">IMAX</option>
+            <option value="4DX">4DX</option>
+            <option value="3D">3D</option>
+            <option value="2D">2D</option>
+          </select>
+        </fieldset>
+      </div>
+
+      <!-- Carousel Section: Now Showing -->
+      <div class="section-header">
+        <h3 id="section-now-showing" class="section-title">Now Showing in <span class="active-region-label">Asia</span></h3>
+      </div>
+      <div class="carousel-outer" role="region" aria-labelledby="section-now-showing">
+        <button class="carousel-btn carousel-btn-prev" aria-label="Previous movies">◀</button>
+        <div class="carousel-track-wrapper">
+          <div id="track-now-showing" class="carousel-track"></div>
+        </div>
+        <button class="carousel-btn carousel-btn-next" aria-label="Next movies">▶</button>
+      </div>
+
+      <!-- Carousel Section: Trending -->
+      <div class="section-header">
+        <h3 id="section-trending" class="section-title">Trending This Week</h3>
+      </div>
+      <div class="carousel-outer" role="region" aria-labelledby="section-trending">
+        <button class="carousel-btn carousel-btn-prev" aria-label="Previous trending movies">◀</button>
+        <div class="carousel-track-wrapper">
+          <div id="track-trending" class="carousel-track"></div>
+        </div>
+        <button class="carousel-btn carousel-btn-next" aria-label="Next trending movies">▶</button>
+      </div>
+
+      <!-- Grid Section: Coming Soon -->
+      <div class="section-header">
+        <h3 id="section-coming-soon" class="section-title">Coming Soon</h3>
+      </div>
+      <div id="grid-coming-soon" class="movie-grid" role="region" aria-labelledby="section-coming-soon"></div>
+
+    </section>
+
+    <!-- PAGE 3: Movie Detail Page -->
+    <section id="view-detail" class="view-section" aria-labelledby="detail-heading">
+      <h2 id="detail-heading" class="sr-only">Movie Detail</h2>
+
+      <div class="detail-hero" id="detail-banner" role="region" aria-label="Movie hero banner">
+        <img id="detail-hero-img" class="detail-hero-img" src="" alt="Movie detail backdrop banner">
+        <div class="detail-hero-overlay"></div>
+        <div class="detail-hero-content">
+          <div class="detail-header-text">
+            <h1 id="detail-title" class="detail-title">Movie Title</h1>
+            <ul class="detail-meta-list" id="detail-meta-list">
+              <!-- Meta items added dynamically -->
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-body">
+        
+        <!-- Left: Synopsis, Cast, Trailer -->
+        <div class="detail-main">
+          
+          <div class="glass-panel" style="padding: 1.5rem; margin-bottom: 2rem;">
+            <h3 class="detail-synopsis-title">Synopsis</h3>
+            <div id="detail-synopsis" class="detail-synopsis-text"></div>
+            <button id="btn-synopsis-toggle" class="btn-readmore">Read more</button>
+          </div>
+
+          <!-- Cast and Crew Scroll -->
+          <div class="glass-panel" style="padding: 1.5rem; margin-bottom: 2rem;">
+            <h3 class="detail-synopsis-title">Starring Cast</h3>
+            <div class="cast-wrapper" role="region" aria-label="Cast list slider">
+              <div id="cast-list" class="cast-track">
+                <!-- Cast cards rendered dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Trailer Embed -->
+          <div class="glass-panel" style="padding: 1.5rem;">
+            <h3 class="detail-synopsis-title">Official Movie Trailer</h3>
+            <div class="video-wrapper">
+              <video id="trailer-video" class="video-player" controls preload="metadata" crossorigin="anonymous">
+                <track kind="captions" src="assets/dune-captions.vtt" srclang="en" label="English" default>
+              </video>
+            </div>
+            <!-- Audio Description toggle -->
+            <div style="display: flex; gap: 10px; margin-top: 10px; align-items: center; flex-wrap: wrap;">
+              <button id="btn-audio-description" class="nav-item" aria-pressed="false">
+                📣 Audio Description: Off
+              </button>
+              <p style="font-size: 0.8rem; color: var(--text-muted);">Enables cinematic voice guidance on playback.</p>
+            </div>
+            <!-- Video Quality and Unmute Controls -->
+            <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 15px; align-items: center; justify-content: space-between; border-top: 1px solid var(--border-glass); padding-top: 15px;">
+              <div style="display: flex; gap: 10px; align-items: center;">
+                <label for="video-quality-select" style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);">Preferred Quality:</label>
+                <select id="video-quality-select" class="filter-select" aria-label="Select movie quality">
+                  <option value="1080p">Standard HD (1080p)</option>
+                  <option value="4k">Premium Ultra HD (4K UHD)</option>
+                  <option value="8k">Super Cinema (8K UHD)</option>
+                </select>
+              </div>
+              <button id="btn-unmute-trailer" class="nav-item" style="border-color: var(--accent-gold); border-width: 2px; font-weight: 700; color: var(--accent-gold); display: none;" aria-label="Unmute trailer audio">
+                🔊 Unmute Trailer
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right: Showtime Schedule date picker & theater listings -->
+        <div class="detail-sidebar">
+          <div class="glass-panel sidebar-panel">
+            <h3 class="sidebar-title">Select Date & Time</h3>
+            
+            <!-- Date Picker Calendar slider -->
+            <div class="date-picker-scroll" id="detail-date-picker" role="listbox" aria-label="Choose date of showtime">
+              <!-- Render 7 days dynamically -->
+            </div>
+
+            <!-- Theaters Grid list -->
+            <div id="theaters-list" aria-live="polite">
+              <!-- Theater slots render here -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- PAGE 4: Seat Selection Page -->
+    <section id="view-seats" class="view-section" aria-labelledby="seats-heading">
+      <h2 id="seats-heading" class="sr-only">Seat Map Selection</h2>
+
+      <div class="seats-layout-container">
+        
+        <!-- Interactive Seat Grid -->
+        <div class="glass-panel seats-map-panel">
+          
+          <div class="screen-visual-container">
+            <div class="screen-visual" aria-hidden="true"></div>
+            <span class="screen-text">Screen this side</span>
+          </div>
+
+          <!-- Live announcements for seats selected -->
+          <div id="seats-live-region" class="sr-only" aria-live="polite"></div>
+
+          <!-- Grid map container -->
+          <div class="seats-scrollable">
+            <div id="seats-zoom-container" class="seats-grid-zoomable">
+              <div id="seats-grid-map" class="seats-grid" role="grid" aria-label="Theater seat layout grid">
+                <!-- Rows and seats injected here -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Legend -->
+          <div class="seats-legend" aria-hidden="true">
+            <div class="legend-item"><span class="legend-box standard"></span> Standard</div>
+            <div class="legend-item"><span class="legend-box premium"></span> Premium</div>
+            <div class="legend-item"><span class="legend-box couple"></span> Couple (Double)</div>
+            <div class="legend-item"><span class="legend-box accessible"></span> Accessible (Wheelchair)</div>
+            <div class="legend-item"><span class="legend-box occupied"></span> Occupied</div>
+            <div class="legend-item"><span class="legend-box selected"></span> Selected</div>
+          </div>
+
+          <!-- Zoom Map Controls -->
+          <div class="zoom-controls">
+            <button id="btn-zoom-in" class="btn-zoom" aria-label="Zoom seat map in">+</button>
+            <button id="btn-zoom-out" class="btn-zoom" aria-label="Zoom seat map out">-</button>
+          </div>
+
+        </div>
+
+        <!-- Sticky Reservation Sidebar -->
+        <div class="glass-panel sidebar-sticky-summary">
+          <h3 class="summary-title">Ticket Booking</h3>
+          <div class="summary-row">
+            <span>Movie:</span>
+            <span id="summary-movie-title" style="font-weight: 600;">Dune: Part Three</span>
+          </div>
+          <div class="summary-row">
+            <span>Date & Time:</span>
+            <span id="summary-movie-date">Friday, June 26</span>
+          </div>
+          <div class="summary-row">
+            <span>Format:</span>
+            <span id="summary-movie-format" style="color: var(--accent-blue);">IMAX 2D</span>
+          </div>
+          
+          <div class="summary-row" style="margin-top: 15px;">
+            <span>Selected Seats:</span>
+            <span id="summary-selected-count">0 seats selected</span>
+          </div>
+          
+          <div id="summary-seats-badges" class="seats-list"></div>
+
+          <div class="summary-row total">
+            <span>Total Price:</span>
+            <span id="summary-total-price">₹ 0.00</span>
+          </div>
+
+          <button id="btn-proceed-to-food" class="btn-primary" style="margin-top: 1.5rem;" disabled>
+            Proceed to Add-ons
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- PAGE 4.5: Food & Beverage Add-ons Page -->
+    <section id="view-food" class="view-section" aria-labelledby="food-heading">
+      <h2 id="food-heading" class="sr-only">Snack and Beverage Add-ons</h2>
+      <div class="food-container">
+        
+        <div class="section-header">
+          <h3 class="section-title">Upgrade Your Cinema Experience</h3>
+          <button id="btn-skip-food" class="nav-item" style="border-color: var(--accent-gold);">Skip snacks &amp; pay</button>
+        </div>
+
+        <div class="food-filters glass-panel" style="padding: 10px; margin-bottom: 2rem;">
+          <button class="food-filter-btn active" data-type="all">All Combos</button>
+          <button class="food-filter-btn" data-type="veg">🟢 Veg</button>
+          <button class="food-filter-btn" data-type="nonveg">🔴 Non-Veg</button>
+          <button class="food-filter-btn" data-type="vegan">🌱 Vegan</button>
+        </div>
+
+        <!-- Food grid -->
+        <div id="food-items-grid" class="food-grid">
+          <!-- Food items rendered dynamically -->
+        </div>
+
+        <!-- Sticky Footer panel -->
+        <div class="glass-panel" style="padding: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+          <div>
+            <div style="font-size: 0.85rem; color: var(--text-secondary);">Tickets Subtotal + Food Selection</div>
+            <div id="food-total-cost" style="font-size: 1.3rem; font-weight: 700; color: var(--accent-gold);">₹ 0.00</div>
+          </div>
+          <button id="btn-proceed-to-payment" class="btn-primary" style="width: auto; padding: 12px 36px;">
+            Proceed to Payment
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- PAGE 5: Payment Page -->
+    <section id="view-payment" class="view-section" aria-labelledby="payment-heading">
+      <h2 id="payment-heading" class="sr-only">Payment details</h2>
+      
+      <div class="payment-layout">
+        
+        <!-- Left: Summary details -->
+        <div class="glass-panel" style="padding: 1.5rem;">
+          <h3 class="summary-title" style="margin-bottom: 1.5rem;">Checkout Summary</h3>
+          <div class="summary-row">
+            <span>Movie:</span>
+            <span id="pay-summary-movie" style="font-weight:600;">Dune: Part Three</span>
+          </div>
+          <div class="summary-row">
+            <span>Show Date:</span>
+            <span id="pay-summary-date">26 June 2026</span>
+          </div>
+          <div class="summary-row">
+            <span>Theater Room:</span>
+            <span id="pay-summary-theater">Grand IMAX Screen 1</span>
+          </div>
+          <div class="summary-row">
+            <span>Seat Numbers:</span>
+            <span id="pay-summary-seats" style="font-weight: 600; color: var(--accent-blue);">B3, B4</span>
+          </div>
+          <div class="summary-row">
+            <span>Snacks Selected:</span>
+            <span id="pay-summary-food" style="text-align: right; font-size: 0.85rem;">None</span>
+          </div>
+
+          <hr style="border: 0; border-top: 1px solid var(--border-glass); margin: 15px 0;">
+
+          <div class="summary-row">
+            <span>Ticket Base Fare:</span>
+            <span id="pay-fare-base">₹ 700.00</span>
+          </div>
+          <div class="summary-row">
+            <span>Snack Charges:</span>
+            <span id="pay-fare-food">₹ 0.00</span>
+          </div>
+          <div class="summary-row">
+            <span>Taxes &amp; Fees (18% GST):</span>
+            <span id="pay-fare-tax">₹ 126.00</span>
+          </div>
+          <div class="summary-row total">
+            <span>Total Payable Amount:</span>
+            <span id="pay-fare-total">₹ 826.00</span>
+          </div>
+
+          <div class="secure-badge-container">
+            <span class="secure-icon">🔒</span>
+            <span>Secure 256-bit SSL encrypted connection</span>
+          </div>
+        </div>
+
+        <!-- Right: Methods form -->
+        <div class="glass-panel" style="padding: 1.5rem;">
+          <form id="form-payment" aria-label="Select Payment Method and Process" novalidate>
+            <fieldset class="payment-methods-fieldset">
+              <legend class="payment-methods-legend">Select Payment Method</legend>
+              <div class="payment-methods-grid" role="radiogroup" aria-label="Select payment mode">
+                
+                <div>
+                  <input type="radio" name="pay-method" id="pay-card" value="card" checked class="payment-method-radio">
+                  <label for="pay-card" class="payment-method-label">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                    <span>Credit / Debit Card</span>
+                  </label>
+                </div>
+
+                <div>
+                  <input type="radio" name="pay-method" id="pay-upi" value="upi" class="payment-method-radio">
+                  <label for="pay-upi" class="payment-method-label">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                    <span>UPI ID Transfer</span>
+                  </label>
+                </div>
+
+                <div>
+                  <input type="radio" name="pay-method" id="pay-apple" value="apple" class="payment-method-radio">
+                  <label for="pay-apple" class="payment-method-label">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-.96.04-2.13.64-2.82 1.45-.6.69-1.12 1.84-.98 2.94 1.07.08 2.16-.52 2.81-1.33z"/></svg>
+                    <span>Apple / Google Pay</span>
+                  </label>
+                </div>
+
+              </div>
+            </fieldset>
+
+            <!-- Card Forms -->
+            <div id="payment-sec-card" class="payment-form-section active">
+              <div class="form-group">
+                <label for="card-num" class="form-label">Card Number</label>
+                <input type="text" id="card-num" class="form-input" placeholder="0000 0000 0000 0000" maxlength="19" required aria-required="true">
+                <span id="err-pay-card-num" class="form-error" role="alert"></span>
+              </div>
+              
+              <div class="card-grid-row">
+                <div class="form-group">
+                  <label for="card-expiry" class="form-label">Expiry Date</label>
+                  <input type="text" id="card-expiry" class="form-input" placeholder="MM/YY" maxlength="5" required aria-required="true">
+                  <span id="err-pay-expiry" class="form-error" role="alert"></span>
+                </div>
+                <div class="form-group">
+                  <label for="card-cvv" class="form-label">
+                    CVV
+                    <span class="tooltip" tabindex="0" aria-label="CVV explanation tooltip">
+                      ⓘ
+                      <span class="tooltiptext">The 3-digit security code printed on the back of your card.</span>
+                    </span>
+                  </label>
+                  <input type="password" id="card-cvv" class="form-input" placeholder="***" maxlength="3" required aria-required="true">
+                  <span id="err-pay-cvv" class="form-error" role="alert"></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- UPI ID Forms -->
+            <div id="payment-sec-upi" class="payment-form-section">
+              <div class="form-group">
+                <label for="upi-id" class="form-label">UPI VPA Address</label>
+                <input type="text" id="upi-id" class="form-input" placeholder="username@bankhandle" required aria-required="true">
+                <span id="err-pay-upi" class="form-error" role="alert"></span>
+              </div>
+            </div>
+
+            <!-- Apple / Google Pay form -->
+            <div id="payment-sec-apple" class="payment-form-section">
+              <p style="font-size: 0.9rem; color: var(--text-secondary); text-align: center; padding: 1.5rem 0;">
+                Press pay to authorize instantly using your default system digital wallet application.
+              </p>
+            </div>
+
+            <!-- Submit payment btn -->
+            <button type="submit" id="btn-pay-now" class="btn-primary" style="margin-top: 1.5rem;">
+              Pay Now
+            </button>
+          </form>
+
+          <!-- Dynamic OTP verification Modal card overlay -->
+          <div id="otp-verification-screen" style="display: none; border-top: 1px dashed var(--border-glass); margin-top: 20px;">
+            <div class="otp-container">
+              <h3 style="font-family: var(--font-display); font-size: 1.1rem; color: var(--accent-gold);">Secure OTP Verification</h3>
+              <p style="font-size: 0.85rem; color: var(--text-secondary); text-align: center;">Enter the 6-digit verification code sent to your registered phone number.</p>
+              
+              <div class="otp-inputs" id="otp-inputs-row">
+                <input type="text" maxlength="1" class="otp-digit" aria-label="OTP Digit 1" required>
+                <input type="text" maxlength="1" class="otp-digit" aria-label="OTP Digit 2" required disabled>
+                <input type="text" maxlength="1" class="otp-digit" aria-label="OTP Digit 3" required disabled>
+                <input type="text" maxlength="1" class="otp-digit" aria-label="OTP Digit 4" required disabled>
+                <input type="text" maxlength="1" class="otp-digit" aria-label="OTP Digit 5" required disabled>
+                <input type="text" maxlength="1" class="otp-digit" aria-label="OTP Digit 6" required disabled>
+              </div>
+
+              <div class="otp-timer">Resend code in: <span id="otp-timer-count" style="font-weight: 700;">59</span>s</div>
+              
+              <button type="button" id="btn-verify-otp" class="btn-primary" style="width: 150px; padding: 8px;">
+                Verify &amp; Confirm
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- PAGE 6: Booking Confirmation Page -->
+    <section id="view-confirmation" class="view-section" aria-labelledby="confirm-heading">
+      <h2 id="confirm-heading" class="sr-only">Booking Confirmation Success</h2>
+      
+      <div class="confirmation-card glass-panel">
+        
+        <div class="success-check-wrapper">
+          <div class="success-checkmark" id="conf-checkmark">✓</div>
+        </div>
+
+        <h1 style="font-family: var(--font-display); font-size: 1.8rem; margin-bottom: 5px; color: var(--color-success);">Booking Successful!</h1>
+        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 2rem;">Your tickets are locked. Present the QR code or e-ticket at the entry counter.</p>
+
+        <!-- E-ticket -->
+        <div class="e-ticket" id="print-ticket-area">
+          <div class="ticket-header">
+            <img id="conf-poster" class="ticket-poster" src="" alt="Dune movie thumbnail poster">
+            <div>
+              <h3 id="conf-movie-title" class="ticket-title">Dune: Part Three</h3>
+              <p id="conf-movie-format" style="font-size: 0.8rem; color: var(--accent-blue); font-weight: 600;">IMAX 2D</p>
+              <p id="conf-theater" style="font-size: 0.8rem; color: var(--text-secondary);">Grand Theater, Screen 1</p>
+            </div>
+          </div>
+
+          <div class="ticket-grid">
+            <div>
+              <div class="ticket-label">Date</div>
+              <div id="conf-date" class="ticket-val">Friday, June 26</div>
+            </div>
+            <div>
+              <div class="ticket-label">Time</div>
+              <div id="conf-time" class="ticket-val">7:30 PM</div>
+            </div>
+            <div>
+              <div class="ticket-label">Seats Booked</div>
+              <div id="conf-seats" class="ticket-val" style="color: var(--accent-gold);">B3, B4</div>
+            </div>
+            <div>
+              <div class="ticket-label">Snack Add-ons</div>
+              <div id="conf-food" class="ticket-val">None</div>
+            </div>
+          </div>
+
+          <div class="ticket-qr-container">
+            <div id="conf-qr-code" class="ticket-qr">
+              <!-- Inline QR code image placeholder -->
+              <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="4">
+                <rect x="5" y="5" width="25" height="25" fill="black" stroke="black"></rect>
+                <rect x="70" y="5" width="25" height="25" fill="black" stroke="black"></rect>
+                <rect x="5" y="70" width="25" height="25" fill="black" stroke="black"></rect>
+                <line x1="45" y1="10" x2="55" y2="10" stroke="black" stroke-width="4"></line>
+                <line x1="45" y1="25" x2="60" y2="25" stroke="black" stroke-width="4"></line>
+                <line x1="10" y1="45" x2="10" y2="60" stroke="black" stroke-width="4"></line>
+                <line x1="80" y1="45" x2="80" y2="90" stroke="black" stroke-width="4"></line>
+                <line x1="45" y1="45" x2="65" y2="45" stroke="black" stroke-width="4"></line>
+                <line x1="45" y1="75" x2="65" y2="75" stroke="black" stroke-width="4"></line>
+                <rect x="12" y="12" width="11" height="11" fill="white"></rect>
+                <rect x="77" y="12" width="11" height="11" fill="white"></rect>
+                <rect x="12" y="77" width="11" height="11" fill="white"></rect>
+              </svg>
+            </div>
+            <div id="conf-booking-id" class="ticket-id">CIN-2025-X239A7</div>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <button id="btn-download-ticket" class="btn-primary" style="margin-bottom: 1rem;">
+          Download E-Ticket (PDF)
+        </button>
+
+        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 5px;">Share with friends</div>
+        <div class="share-buttons">
+          <button id="btn-share-whatsapp" class="btn-share" aria-label="Share ticket details via WhatsApp">💬</button>
+          <button id="btn-share-email" class="btn-share" aria-label="Share ticket details via Email">✉️</button>
+          <button id="btn-share-copy" class="btn-share" aria-label="Copy ticket link details to clipboard">🔗</button>
+        </div>
+
+        <button id="btn-conf-home" class="nav-item" style="display: inline-flex; justify-content: center; width: 100%; border-color: var(--accent-blue); padding: 10px;">
+          Explore More Movies
+        </button>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Global Trailer Modal Overlay Dialog -->
+  <div id="trailer-dialog" class="dialog-overlay" role="dialog" aria-modal="true" aria-labelledby="dialog-title" tabindex="-1">
+    <div class="dialog-card glass-panel" id="trailer-dialog-card">
+      <button id="btn-close-dialog" class="dialog-close" aria-label="Close dialog">×</button>
+      <h3 id="dialog-title" class="sr-only">Movie Trailer Player</h3>
+      <div class="video-wrapper" style="margin-top: 15px;">
+        <video id="modal-video-player" class="video-player" controls preload="none">
+          <track kind="captions" src="assets/dune-captions.vtt" srclang="en" label="English" default>
+        </video>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
+        <button id="btn-modal-audio-description" class="nav-item" aria-pressed="false">📣 AD: Off</button>
+        <span style="font-size: 0.8rem; color: var(--text-secondary);">Keyboard Controls: Space (Play/Pause), M (Mute), Arrows (Seek)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Client JavaScript -->
+  <script src="app.js"></script>
+</body>
+</html>
